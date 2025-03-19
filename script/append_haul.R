@@ -3,10 +3,8 @@
 #1) Add a column for maturity using clutch codes/chela heights
      #Distribution based cutlines via Richar and Foy 2022
 #2) Add in haul data (bottom temp, depth, lat/long, day sampled)
-#3) Calculate CPUE at each station
-    #_cpue: total tanner/snow CPUE by station 
-    #70under_cpue: <70mm CW tanner/snow CPUE by station - portion of pop w/ highest BCS prevalence 
-    
+#3) Calculate snow crab CPUE at each station
+   
 # Author: Erin Fedewa
 
 # load ----
