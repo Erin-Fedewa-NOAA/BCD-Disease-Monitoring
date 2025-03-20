@@ -48,8 +48,7 @@ nbs_haul <- read.csv("./data/crabhaul_opilio_nbs.csv")
 ebs_haul %>%
   bind_rows(nbs_haul) %>% 
   mutate(YEAR = as.numeric(str_extract(CRUISE, "\\d{4}"))) %>%
-  filter(YEAR %in% c(2014:2023),
-         HAUL_TYPE==3) %>%
+  filter(YEAR %in% c(2014:2023)) %>%
   select(VESSEL, CRUISE, START_DATE, HAUL, MID_LATITUDE, MID_LONGITUDE,GIS_STATION,
          BOTTOM_DEPTH,GEAR_TEMPERATURE) %>%
   distinct() -> haul
@@ -65,8 +64,7 @@ pcr_mat %>%
 ebs_haul %>%
   bind_rows(nbs_haul) %>% 
   mutate(YEAR = as.numeric(str_extract(CRUISE, "\\d{4}"))) %>%
-  filter(YEAR %in% c(2014:2023),
-         HAUL_TYPE==3) %>%
+  filter(YEAR %in% c(2014:2023)) %>%
   rename_with(tolower) %>%
   group_by(cruise, gis_station, area_swept) %>% 
   summarise(cpue = sum(sampling_factor, na.rm = T) / mean(area_swept)) %>%
