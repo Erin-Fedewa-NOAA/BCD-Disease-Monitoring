@@ -66,8 +66,7 @@ One master dataset has been produced for further modeling via the "append_haul" 
 |  `pcr_result` | Bitter crab disease diagnosis via conventional PCR assay for detection of Hematodinium spp. DNA. 0=uninfected, 1=infected, 3=undetermined   |  numeric
 | `year`     |        Year of specimen collection | numeric
 |  `pcr_result` | Bitter crab disease diagnosis via PCR assay for detection of Hematodinium spp. DNA. 0=uninfected, 1=infected, 3=undetermined   |  numeric
-|  `index_site` | Bering Sea sites established for bitter crab disease monitoring. Sites 4-6 = EBS snow crab index sites, Site 7 = NBS snow crab index site. In 2018, the NBS index site was designated as "NBS" because this was a rapid response survey and sampling was    
-                not conducted in standard survey grid   |  numeric
+|  `index_site` | Bering Sea sites established for bitter crab disease monitoring. Sites 4-6 = EBS snow crab index sites, Site 7 = NBS snow crab index site. In 2018, the NBS index site was designated as "NBS" because this was a rapid response survey and sampling was not conducted in standard survey grid   |  numeric
 |  `general_location` | Large marine ecosystem. EBS=eastern Bering Sea, NBS=northern Bering Sea   |  text
 |  `collected_by` | Agency taking hemolymph samples. SAP = NOAA AFSC Shellfish Assessment Program   |  text
 |  `dna_plate_no` | Plate number containing hemolymph sample   |  numeric
@@ -80,14 +79,14 @@ One master dataset has been produced for further modeling via the "append_haul" 
 |  `haul`      |  Uniquely identifies a sampling event (haul) within an AFSC cruise. It is a sequential number, in chronological order of occurrence |  numeric
 |  `visual_positive` | Infection status via visual diagnosis. NA=not recorded, 0=not infected, 1=infected   |  numeric
 |  `prioritization` | Dataset has been filtered for prioritization=1, as these were samples prioritized for VIMS PCR analysis   |  numeric
-|  `dna_quant`  |  FINISH  | numeric  
-|  `x260_280_ratio`  |  FINISH  | numeric  
-|  `nssu_pcr`  |  FINISH  | numeric  
-|  `faint_pos`  |  FINISH  | numeric  
-|  `no_valid_partitions`  |  FINISH  | numeric  
-|  `no_positive_partitions`  |  FINISH  | numeric  
-|  `copies_ul`  |  FINISH  | numeric 
-|  `maturity`  |  Maturity of specimen sampled, as determined by chela (males) or clutch morphology (females). 0=Immature, 1=Mature"  | numeric  
+|  `dna_quant`  |  Concentration of DNA in hemolymph sample extracted (2018+ data only)  | numeric, in ng/microL  
+|  `ratio_260_280`  |  Measurement of the absorbance of light at 260 and 280 nm of extracted DNA. Used to determine the quality/purity, with ~1.8-2 ideal (2018+ data only)  | numeric  
+|  `nssu_pcr`  |  General metazoan PCR primer set (nSSU A and nSSU B) used in conventional PCR as a nominal control for the presence of amplifiable DNA in the samples, where 0=failure to produce an amplification product/no host DNA cells present.  (2018+ data only)  | numeric  
+|  `faint_pos`  |  Subjective assessment of the intensity of the ethidium bromide stained PCR amplification product (2018+ data only). F=faint positive  | numeric  
+|  `no_valid_partitions`  |  Number of partitions where the reference fluorescence signal is detected and therefore this partition can be used in subsequent digital PCR calculations. (2018+ data only)  | numeric  
+|  `no_positive_partitions`  |  Number of partitions where fluorescent signal from amplification of the target DNA (Hematodinium) was detected during digital PCR. (2018+ data only)  | numeric  
+|  `copies_ul`  |  Poisson statistics-based calculation of the copy number of the target DNA sequence. (2018+ data only)  | numeric 
+|  `maturity`  |  Maturity of specimen sampled, as determined by chela (males) or clutch morphology (females). 0=Immature, 1=Mature  | numeric  
 | `start_date`     |        Date of sampling | date, month/day/year
 | `mid_latitude`       |   Latitude of specimen collection. Designates latitude at start of haul for AFSC standardized surveys    | numeric
 |  `mid_longitude`    | Longitude of specimen collection. Designates longitude at start of haul for AFSC standardized surveys | decimal degree
