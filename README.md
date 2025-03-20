@@ -101,7 +101,7 @@ Distribution
 
   File                                              Format    
   ------------------------------------------------- -------- -------------------------------------------------
-  `pcr_haul_master`   `csv`    [Download](https://github.com/Erin-Fedewa-NOAA/BCS_2014-2017/tree/master/data)
+  `pcr_haul_master`   `csv`    [Download](https://github.com/Erin-Fedewa-NOAA/BCD-Disease-Monitoring/blob/main/data/pcr_haul_master.csv)    
  ------------------------------------------------- -------- -------------------------------------------------
 
  # NOAA License
