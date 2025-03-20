@@ -1,5 +1,11 @@
 # Bitter crab disease monitoring in Bering Sea snow crab
-This dataset combines the former AFSC Pathobiology Program bitter crab disease detection efforts (2014-2017; conventional PCR) and Virginia Institute of Marine Science bitter crab disease detection efforts (2018-2023; conventional and digital PCR) to 1) estimate annual disease prevalence in index monitoring sites, 2) investigate potential drivers of bitter crab disease, and 3) assess the accuracy and sensitivity of visual diagnostic methods. Many analyses using this combined dataset are leveraged from Fedewa et al. 2025, [Bitter crab disease dynamics in eastern Bering Sea Tanner and snow crab: An underestimated and emergent stressor](https://www.sciencedirect.com/science/article/pii/S016578362500044X). 
+This dataset combines the former NOAA AFSC Pathobiology Program bitter crab molecular disease surveillance data (2014-2017; conventional PCR) and Virginia Institute of Marine Science bitter crab molecular disease surveillance data (2018-2023; conventional and digital PCR) in three eastern Bering Sea index sites and one northern Bering Sea index site. In addition to molecular surveillance, bitter crab disease has been monitored annually across the full spatial extent of eastern and northern Bering Sea since 1988 with less sensitive visual diagnostic methods (i.e. discolored carapace and hemolymph). 
+
+Using this integrated dataset, we can address the following objectives:
+1) Estimate annual bitter crab disease prevalence in index monitoring sites
+2) Investigate potential drivers of bitter crab disease
+3) Assess the accuracy and sensitivity of visual diagnostic methods 
+Many analyses using this combined dataset are leveraged from Fedewa et al. 2025, [Bitter crab disease dynamics in eastern Bering Sea Tanner and snow crab: An underestimated and emergent stressor](https://www.sciencedirect.com/science/article/pii/S016578362500044X). 
 
 # Project PIs: 
 Erin Fedewa, Hamish Small, Maya Groner, Reyn Yoshioka
