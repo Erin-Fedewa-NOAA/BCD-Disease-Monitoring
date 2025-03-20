@@ -40,7 +40,7 @@ Coverage
 |                | Eastern Bering Sea |
 |                | Northern Bering Sea |
 
-![Rplot](https://github.com/Erin-Fedewa-NOAA/BCS_2014-2017/blob/master/figs/n_year.png)
+![Rplot](https://github.com/Erin-Fedewa-NOAA/BCD-Disease-Monitoring/blob/main/figures/map_effort.png)
 
 
 Attributes
