@@ -5,6 +5,7 @@ Using this integrated dataset, we can address the following objectives:
 1) Estimate annual bitter crab disease prevalence in index monitoring sites
 2) Investigate potential drivers of bitter crab disease
 3) Assess the accuracy and sensitivity of visual diagnostic methods 
+
 Many analyses using this combined dataset are leveraged from Fedewa et al. 2025, [Bitter crab disease dynamics in eastern Bering Sea Tanner and snow crab: An underestimated and emergent stressor](https://www.sciencedirect.com/science/article/pii/S016578362500044X). 
 
 # Project PIs: 
