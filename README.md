@@ -16,7 +16,7 @@ Bibliographic
 | Published     | 03/13/2025   |
 | ------------- | ------------- |
 | Keywords      | snow crab |
-|               |   Tanner crab |
+|               |   diagnostic methods |
 |               |  Bering Sea |
 |               | bitter crab disease |
 |               | Hematodinium |
@@ -45,18 +45,14 @@ Coverage
 
 Attributes
 ----------
-One master dataset has been produced for further modeling via the "maturity_haul" script. "pcr_haul_master.csv" includes all crab biometric, disease diagnosis and haul level data, with data attributes listed below. 
+One master dataset has been produced for further modeling via the "append_haul" script. "pcr_haul_master.csv" includes all crab biometric, disease diagnosis and haul level data, with data attributes listed below. 
 
 | Name    |    Description   |   Unit    |
 | ------- | ---------------- | ---------- |
-| `year`     |        Year of specimen collection | numeric
-| `gis_station`   | Alpha-numeric designation for the station established in the design of AFSC standardized surveys | numeric/text  
-|  `snow_cpue`   |   Station-level snow crab density   |   numeric, crab/nmi^2
-|  `snow70under_cpue`   |   Station-level density of snow crab <70 mmm carapace width   |   numeric, crab/nmi^2
-|  `snowimm_cpue`   |   Station-level density of all snow crab below size cutoffs specified in at-sea protocols   |   numeric, crab/nmi^2
-|  `tanner_cpue`   |   Station-level Tanner crab density   |   numeric, crab/nmi^2
-|  `tanner70under_cpue`   |   Station-level density of Tanner crab <70 mmm carapace width   |   numeric, crab/nmi^2
-|  `tannerimm_cpue`   |   Station-level density of all Tanner crab below size cutoffs specified in at-sea protocols   |   numeric, crab/nmi^2
+|  `cruise` | Cruise ID for Bering Sea bottom trawl surveys. YEAR-01 designates EBS surveys, YEAR-02 designates NBS surveys  |  numeric
+| `gis_station`   | Alpha-numeric designation for the station established in the design of AFSC standardized surveys | numeric/text
+|  `area_swept`   |   Unit of effort for AFSC bottom trawl surveys: computed by distance towed*mean net width   |   numeric, in ha
+|  `cpue`   |   Station-level snow crab density   |   numeric, crab/nmi^2
 |  `spno` |   Unique specimen ID. First four numbers correspond to year of collection   |  numeric
 |  `species_name` | Species name of specimen sampled   |  text
 |  `sex` | Sex of specimen sampled. 1=Male, 2-Female   |  numeric
@@ -67,26 +63,37 @@ One master dataset has been produced for further modeling via the "maturity_haul
  |  `egg_cond` | Egg condition of clutch (females only). 0=No Eggs, 1=Uneyed eggs, 2=Eyed eggs, 3=Dead eggs, 4=Empty eggs cases, 5=Hatching eggs  |  numeric
  |  `clutch` | Size of clutch (females only). 0=Immature: no eggs, 1=Mature: no eggs, 2=Trace to 1/8 full, 3=1/4 full, 4=1/2 full, 5=3/4 full, 6=Full   |  numeric
 |  `collection_comments`    |    Notes on datasheet from at-sea samplers   |   text
+|  `pcr_result` | Bitter crab disease diagnosis via conventional PCR assay for detection of Hematodinium spp. DNA. 0=uninfected, 1=infected, 3=undetermined   |  numeric
+| `year`     |        Year of specimen collection | numeric
 |  `pcr_result` | Bitter crab disease diagnosis via PCR assay for detection of Hematodinium spp. DNA. 0=uninfected, 1=infected, 3=undetermined   |  numeric
-|  `index_site` | Eastern Bering Sea sites established for bitter crab disease monitoring. Sites 1-3=Tanner crab samples, Sites 4-6=Snow crab samples   |  numeric
-|  `general_location` | Large marine ecosystem of sampling event. EBS=eastern Bering Sea   |  text
+|  `index_site` | Bering Sea sites established for bitter crab disease monitoring. Sites 4-6 = EBS snow crab index sites, Site 7 = NBS snow crab index site. In 2018, the NBS index site was designated as "NBS" because this was a rapid response survey and sampling was    
+                not conducted in standard survey grid   |  numeric
+|  `general_location` | Large marine ecosystem. EBS=eastern Bering Sea, NBS=northern Bering Sea   |  text
 |  `collected_by` | Agency taking hemolymph samples. SAP = NOAA AFSC Shellfish Assessment Program   |  text
 |  `dna_plate_no` | Plate number containing hemolymph sample   |  numeric
 |  `dna_well_no` | Individual well plate number containing hemolymph sample   |  alpha-numeric
+|  `host_tissue` | Type of biological sample collected for PCR   |  text
 |  `preservative` | Method of preservation for tissue/blood sample   |  text
 |  `sample_status` | Disposition of tissue/blood sample   |  text
 |  `c_v_h` | Combined string with cruise, vessel and haul for collections   |  numeric 
-|  `cruise` | Cruise ID for Bering Sea/GOA/Atlantic bottom trawl surveys. See RACEBASE or AKFIN for additional NOAA cruise metadata   |  numeric
 |  `vessel`  |     ID number of the vessel used to collect data for that haul associated with vessel name    |   numeric
 |  `haul`      |  Uniquely identifies a sampling event (haul) within an AFSC cruise. It is a sequential number, in chronological order of occurrence |  numeric
 |  `visual_positive` | Infection status via visual diagnosis. NA=not recorded, 0=not infected, 1=infected   |  numeric
+|  `prioritization` | Dataset has been filtered for prioritization=1, as these were samples prioritized for VIMS PCR analysis   |  numeric
+|  `dna_quant`  |  FINISH  | numeric  
+|  `x260_280_ratio`  |  FINISH  | numeric  
+|  `nssu_pcr`  |  FINISH  | numeric  
+|  `faint_pos`  |  FINISH  | numeric  
+|  `no_valid_partitions`  |  FINISH  | numeric  
+|  `no_positive_partitions`  |  FINISH  | numeric  
+|  `copies_ul`  |  FINISH  | numeric 
 |  `maturity`  |  Maturity of specimen sampled, as determined by chela (males) or clutch morphology (females). 0=Immature, 1=Mature"  | numeric  
 | `start_date`     |        Date of sampling | date, month/day/year
 | `mid_latitude`       |   Latitude of specimen collection. Designates latitude at start of haul for AFSC standardized surveys    | numeric
 |  `mid_longitude`    | Longitude of specimen collection. Designates longitude at start of haul for AFSC standardized surveys | decimal degree
  | `bottom_depth`    |    Bottom depth at station for AFSC standardized surveys  | numeric, in m
 |  `gear_temperature`   |    Bottom temperature at sampling station | degree C
- | `start_date`     |        Date of sampling | date, month/day/year
+
 
 :::
 
