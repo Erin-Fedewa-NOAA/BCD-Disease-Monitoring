@@ -1,12 +1,18 @@
-# notes ----
-#Data exploration: BCS infection dynamics in C. opilio 
+#Data exploration: 
+  #Maturity/crab size/sample size 
+  #Index site maps by year
+  #Quick glance at covariates of interest for modeling drivers
 
-# Author: Mike Litzow & Erin Fedewa
-# last updated: 2022/11/7
+# Author: Erin Fedewa
 
 # load ----
 library(tidyverse)
 library(lubridate)
+library(sf)
+library(terra)
+library(akgfmaps)
+library(ggridges)
+library(patchwork)
 
 #load PCR data 
 dat <- read.csv("./data/pcr_haul_master.csv")
@@ -16,16 +22,11 @@ dat <- read.csv("./data/pcr_haul_master.csv")
 
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
-  filter(species_name == "Chionoecetes opilio",
-         index_site %in% c(4, 5, 6),
-         year %in% c(2015:2017),
-         sex %in% c(1, 2),
-         pcr_result %in% c(1, 0)) %>%
-  select(pcr_result, size, sex, index_site, year, gis_station, julian, mid_latitude, bottom_depth, 
-         gear_temperature, snow70under_cpue, snowimm_cpue) %>%
+  filter(pcr_result %in% c(1, 0)) %>%
   rename(pcr = pcr_result,
                 station = gis_station,
                 latitude = mid_latitude,
+                longitude = mid_longitude,
                 depth = bottom_depth,
                 temperature = gear_temperature,
                 index = index_site) %>%
@@ -34,15 +35,84 @@ dat %>%
                 index = as.factor(index),
                 station = as.factor(station)) -> opilio.dat 
 
+###############################################
+#Spatial maps
+
+## SET COORDINATE REFERENCE SYSTEMS (CRS) --------------------------------------
+in.crs <- "+proj=longlat +datum=NAD83" #CRS is in lat/lon
+map.crs <- "EPSG:3338" # final crs for mapping/plotting: Alaska Albers
+
+## LOAD SHELLFISH ASSESSMENT PROGRAM GEODATABASE -------------------------------
+survey_gdb <- "./data/SAP_layers" 
+survey_strata <- terra::vect(survey_gdb, layer = "EBS.NBS_surveyarea")
+#EBS/NBS Boundary line
+boundary <- st_read(layer = "EBS_NBS_divide", survey_gdb)
+
+## LOAD ALASKA REGION LAYERS (FROM AKGFMAPS R package) -----------------------------------
+ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs", set.crs = "EPSG:3338")
+ebs_survey_areas <- ebs_layers$survey.area
+ebs_survey_areas$survey_name <- c("Eastern Bering Sea", "Northern Bering Sea")
+
+#Transform crab data into spatial data frame
+opilio.dat  %>% 
+  group_by(year, general_location, latitude, longitude) %>%
+  summarise(n_crab=n()) %>% 
+  # Convert lat/long to an sf object
+  st_as_sf(coords = c("longitude", "latitude"), crs = st_crs(4326)) %>%
+  #st_as_sf needs crs of the original coordinates- need to transform to Alaska Albers
+  st_transform(crs = st_crs(3338)) -> map_dat
+
+#Add crab data to map
+ggplot() +
+  geom_sf(data = ebs_layers$survey.grid, fill=NA, color=alpha("grey80"))+
+  geom_sf(data = ebs_survey_areas, fill = NA) +
+  geom_sf(data = ebs_layers$akland, fill = "grey80", color = "black") +
+  #add crab data
+  geom_sf(data=map_dat, aes(size = n_crab, color=general_location), alpha = .6) +
+  geom_sf(data= boundary, linewidth = 1, color = "grey40") +
+  scale_x_continuous(limits = ebs_layers$plot.boundary$x,
+                     breaks = ebs_layers$lon.breaks) +
+  scale_y_continuous(limits = ebs_layers$plot.boundary$y,
+                     breaks = ebs_layers$lat.breaks) +
+  scale_size_continuous(range = c(1,4)) +
+  theme_bw() +
+  facet_wrap(~year) +
+  scale_color_manual(values = c("#034e7b", "#238b45")) +
+  theme(plot.margin = margin(0,-5,0,-5)) +
+  theme(axis.text=element_text(size=8)) +
+  theme(axis.text.x=element_blank()) 
+ggsave("./figures/map_effort.png")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###############################################
+
 #examine <70mm opilio cpue distribution                                    
 ggplot(opilio.dat, aes(snow70under_cpue)) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
-  #4th root
+#4th root
 ggplot(opilio.dat, aes(snow70under_cpue^0.25)) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
-  #log
+#log
 ggplot(opilio.dat, aes(log(snow70under_cpue))) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
@@ -50,11 +120,11 @@ ggplot(opilio.dat, aes(log(snow70under_cpue))) +
 ggplot(opilio.dat, aes(snowimm_cpue)) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
-  #4th root
+#4th root
 ggplot(opilio.dat, aes(snowimm_cpue^0.25)) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
-  #log
+#log
 ggplot(opilio.dat, aes(log(snowimm_cpue))) +
   geom_histogram(bins = 30, fill = "grey", color = "black")
 
@@ -62,9 +132,6 @@ ggplot(opilio.dat, aes(log(snowimm_cpue))) +
 opilio.dat %>%
   mutate(fourth.root.cpue70 = snow70under_cpue^0.25,
          fouth.root.cpueimm = snowimm_cpue^0.25) -> opilio.dat 
-
-###############################################
-#Data exploration
 
 nrow(opilio.dat) # 1520 samples!
 
