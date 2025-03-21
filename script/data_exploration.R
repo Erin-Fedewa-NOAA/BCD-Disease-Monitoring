@@ -83,26 +83,9 @@ ggplot() +
   theme(axis.text.x=element_blank()) 
 ggsave("./figures/map_effort.png")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###############################################
+
+#to look at in detail- maturity/shell condition
 
 #examine <70mm opilio cpue distribution                                    
 ggplot(opilio.dat, aes(snow70under_cpue)) +

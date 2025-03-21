@@ -29,13 +29,13 @@ pcr_master %>%
                                          #Define conditions for EBS immature/mature male using cutlines 
                                          (Sex == 1 & General_Location == "EBS" & 
                                             log(Chela) < -2.20640 + 1.13523 * log(Size)) | #immature male EBS
-                                           (Sex == 1 & Size < 50 & General_Location == "EBS") ~ 0,
+                                           (Sex == 1 & Size < 40 & General_Location == "EBS") ~ 0,
                                            (Sex == 1 & General_Location == "EBS" &
                                             log(Chela) >= -2.20640 + 1.13523 * log(Size)) ~ 1, #mature male EBS
                                          #NBS male cutlines
                                          (Sex == 1 & General_Location == "NBS" & 
-                                            log(Chela) < -1.916947 + 1.070620 * log(Size))| 
-                                           (Sex == 1 & Size < 40 & General_Location == "NBS") ~ 0, #immature male NBS
+                                            log(Chela) < -1.916947 + 1.07062 * log(Size))| 
+                                           (Sex == 1 & Size < 30 & General_Location == "NBS") ~ 0, #immature male NBS
                                          (Sex == 1 & General_Location == "NBS" &
                                             log(Chela) >= -1.916947 + 1.070620 * log(Size)) ~ 1)) -> pcr_mat
 
