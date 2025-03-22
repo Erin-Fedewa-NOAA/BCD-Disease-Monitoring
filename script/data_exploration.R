@@ -22,7 +22,8 @@ dat <- read.csv("./data/pcr_haul_master.csv")
 
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
-  filter(pcr_result %in% c(1, 0)) %>%
+  filter(pcr_result %in% c(1, 0), 
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   rename(pcr = pcr_result,
                 station = gis_station,
                 latitude = mid_latitude,
@@ -84,89 +85,85 @@ ggplot() +
 ggsave("./figures/map_effort.png")
 
 ###############################################
+#Sample sizes and maturity/size
 
-#to look at in detail- maturity/shell condition
-
-#examine <70mm opilio cpue distribution                                    
-ggplot(opilio.dat, aes(snow70under_cpue)) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#4th root
-ggplot(opilio.dat, aes(snow70under_cpue^0.25)) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#log
-ggplot(opilio.dat, aes(log(snow70under_cpue))) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#examine protocol target size opilio cpue distribution to decide on transf.
-ggplot(opilio.dat, aes(snowimm_cpue)) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#4th root
-ggplot(opilio.dat, aes(snowimm_cpue^0.25)) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#log
-ggplot(opilio.dat, aes(log(snowimm_cpue))) +
-  geom_histogram(bins = 30, fill = "grey", color = "black")
-
-#Transform both CPUE indices with 4th root
+# Sample sizes by year plot
 opilio.dat %>%
-  mutate(fourth.root.cpue70 = snow70under_cpue^0.25,
-         fouth.root.cpueimm = snowimm_cpue^0.25) -> opilio.dat 
-
-nrow(opilio.dat) # 1520 samples!
-
-#Sample sizes
-opilio.dat %>%
-  group_by(year, index, station) %>%
+  group_by(year,general_location) %>%
   count() %>%
-  print(n=100) #Only one crab sampled at  some stations..though better than tanner
-
-# BCS+/- by index/year
-opilio.dat %>%
-  select(year, index, pcr) %>%
-  group_by(year, index) %>%
-  summarise(PCR_0 = sum(pcr == 0),
-            PCR_1 = sum(pcr == 1)) %>%
-  pivot_longer(cols = c(-year, -index)) -> plot2
-
-#% +/- stacked barplot
-ggplot(plot2, aes(fill=name, y=value, x=year)) +
-  geom_bar(position="stack", stat="identity") +
-  facet_grid(~ index)
+  ggplot() +
+  geom_bar(aes(x=as.factor(general_location), y= n), stat='identity') +
+  facet_wrap(~year) +
+  theme_bw() +
+  labs(x= "", y = "Sample size")
 
 #Sample sizes by maturity
-dat %>%
-  #filter(maturity != "NA") %>%
-  group_by(year,maturity) %>%
+opilio.dat %>%
+  group_by(general_location,year,maturity) %>%
+  count() %>%
+  print(n=50)
+#lots of missing maturity info in 2014/2015
+#EBS 2016: 25% mature, 2017: 40% mature, 2018: 42% mature
+#2019:64% mature, 2022: 3% mature, 2023: 2% mature
+
+#Sample size by maturity plot 
+opilio.dat %>%
+  group_by(general_location,year,maturity) %>%
   count() %>%
   ggplot() +
   geom_bar(aes(x=as.factor(maturity), y= n), stat='identity') +
   facet_wrap(~year) +
   theme_bw() +
-  labs(x= "Maturity Status", y = "Sample size") #lots of missing maturity info in 14/15
+  labs(x= "Maturity Status", y = "Sample size") 
+
+#Sample sizes by sex
+opilio.dat %>%
+  group_by(year,sex, general_location) %>%
+  count() %>%
+  ggplot() +
+  geom_bar(aes(x=as.factor(sex), y= n), stat='identity') +
+  facet_wrap(general_location~year) +
+  theme_bw() +
+  labs(x= "Sex", y = "Sample size")
+#Weird! In 2017, 2018 and 2019 in the NBS only females were sampled
+
+#Size composition sampled by region/yr
+opilio.dat %>%
+  mutate(Sex = recode_factor(sex, '1' = "M", '2' = "F")) %>%
+  group_by(year) %>%
+  ggplot() +
+  geom_density(aes(x=size, fill=Sex), position = "stack", binwidth = 2) +
+  scale_fill_manual(values=c("#00BFC4", "#F8766D")) +
+  facet_grid(general_location~year) +
+  theme_bw() +
+  labs(x= "Snow crab carapace width (mm)", y = "Count")
 
 #Size range sampled across years
 opilio.dat %>% 
+  group_by(year, general_location) %>%
   summarize(avg_cw = mean(size, na.rm=T), 
             max_cw = max(size, na.rm=T), 
             min_cw = min(size, na.rm=T))
 
-#Size composition sampled by index site/yr
-opilio.dat %>%
-  mutate(Sex = recode_factor(sex, '1' = "M", '2' = "F")) %>%
-  group_by(year, index) %>%
-  ggplot() +
-  geom_histogram(aes(x=size, fill=Sex), position = "stack", bins=50) +
-  scale_fill_manual(values=c("#00BFC4", "#F8766D")) +
-  facet_wrap(~year) +
-  theme_bw() +
-  labs(x= "Snow crab carapace width (mm)", y = "Count")
-ggsave("./figs/opilio_size.png", width=6.75)
+#We can't control for maturity in our annual prevalance models b/c the 
+#early years have so much missing data so we'll have to use size instead. 
+#This is imperfect b/c there is so much variability in size at terminal molt, but
+#size comps in recent years with more immature crab collected are clearly shifted
+#left so I think we'll be okay 
 
- 
+# BCS+/- by region/year
+opilio.dat %>%
+  select(year, general_location, pcr) %>%
+  group_by(year, general_location) %>%
+  summarise(PCR_0 = sum(pcr == 0),
+            PCR_1 = sum(pcr == 1)) %>%
+  pivot_longer(cols = c(-year, -general_location)) -> plot2
+
+#% +/- stacked barplot
+ggplot(plot2, aes(fill=name, y=value, x=year)) +
+  geom_bar(position="stack", stat="identity") +
+  facet_grid(~ general_location)
+
 #Size-frequency distribution of uninfected vrs infected
 opilio.dat %>%
   ggplot(aes(size, fill=as.factor(pcr), color=as.factor(pcr))) +  
@@ -182,13 +179,6 @@ opilio.dat %>%
   ggplot(size, aes(as.factor(size_bin), Prevalance)) +
   geom_col() 
   
-#This is something to keep in mind when interpreting changes in prev. across
-#site and year- at site 6 prevalence was very low, but is likely due to 
-#most samples being taken from mature males (despite protocol specifying imm).
-#Without pulling them, it's difficult to interpret changes in prevalence as 
-#a true measure of the disease prev, vrs. just a factor of the subset of population 
-#being sampled. 
-
 #############################################
 #Covariate data exploration 
 
@@ -198,12 +188,13 @@ opilio.dat %>%
   summarise(temperature = mean(temperature),
             depth = mean(depth),
             julian = mean(julian),
-            cpue = mean(snow70under_cpue)) -> plot 
+            cpue = mean(cpue)) -> plot 
 
 #Temperature
 ggplot(plot, aes(temperature)) +
   geom_histogram(bins = 12, fill = "dark grey", color = "black") +
   facet_grid(year ~ index)
+#WOW! A 9C station sampled in 2018 in the NBS, crazy 
 
 #CPUE
 ggplot(plot, aes(cpue)) +
@@ -218,11 +209,11 @@ ggplot(plot, aes(depth)) +
 #Julian Day 
 ggplot(plot, aes(julian)) +
   geom_histogram(bins = 12, fill = "dark grey", color = "black") +
-  facet_grid(year ~ index) # big differences among index areas
+  facet_grid(year ~ index) 
 
 #Julian date vrs temperature 
 ggplot(plot, aes(julian, temperature)) +
-  geom_point() # Stronger correlation than tanner temp vrs date 
+  geom_point()  
 
 #Plot explanatory variables as predictors of proportion BCS+ by year/station 
 opilio.dat %>%
@@ -230,39 +221,36 @@ opilio.dat %>%
   summarise(size = mean(size), 
             julian = mean(julian),
             temperature = mean(temperature),
-            CPUE70 = mean(fourth.root.cpue70),
-            CPUEimm = mean(fouth.root.cpueimm),
+            cpue = mean(cpue),
             proportion.positive = sum(pcr == 1) / n()) -> plot3
 
 # Julian day vrs  %positive plot
 ggplot(plot3, aes(julian, proportion.positive)) +
   geom_point() + 
   facet_wrap(~year) +
-  geom_smooth(method = "gam") #Seasonality effect
+  geom_smooth(method = "gam") 
+#Seasonality effect in most years
 
 #Mean size-at-station vrs %positive plot 
 ggplot(plot3, aes(size, proportion.positive)) +
   geom_point() + 
   facet_wrap(~year) +
-  geom_smooth(method = "gam") #size effect
+  geom_smooth(method = "gam") 
+#very clear size effect in years where many mature/large crab sampled
 
 #Temp-at-station vrs %positive plot 
 ggplot(plot3, aes(temperature, proportion.positive)) +
   geom_point() + 
   #facet_wrap(~year) +
-  geom_smooth(method = "gam") #temperature effect
+  geom_smooth(method = "gam") 
 
-# <70mm CPUE-at-station vrs %positive plot 
-ggplot(plot3, aes(CPUE70, proportion.positive)) +
+# CPUE-at-station vrs %positive plot 
+ggplot(plot3, aes(cpue, proportion.positive)) +
   geom_point() + 
   #facet_wrap(~year) +
   geom_smooth(method = "gam")
 
-# Immature CPUE-at-station vrs %positive plot 
-ggplot(plot3, aes(CPUEimm, proportion.positive)) +
-  geom_point() + 
-  facet_wrap(~year) +
-  geom_smooth(method = "gam") #Very similar to above plot 
+
 
 
                               

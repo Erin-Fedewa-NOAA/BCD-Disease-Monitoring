@@ -19,10 +19,8 @@ my_colors2 <- c("#3594cc", "#8cc5e3","#c99b38", "#eddca5")
 ############################################
 #Sample sizes
 dat %>%
-  filter(index_site %in% c(1:6),
-         year %in% c(2015:2017),
-         sex %in% c(1, 2),
-         pcr_result %in% c(1, 0)) %>%
+  filter(pcr_result %in% c(1, 0), 
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   summarize(total = n(),
             pcr_pos = sum(pcr_result==1),
             vis_pos = sum(visual_positive==1))

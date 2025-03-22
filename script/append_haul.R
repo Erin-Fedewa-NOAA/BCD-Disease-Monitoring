@@ -68,11 +68,16 @@ ebs_haul %>%
   rename_with(tolower) %>%
   group_by(cruise, gis_station, area_swept) %>% 
   summarise(cpue = sum(sampling_factor, na.rm = T) / mean(area_swept)) %>%
-  right_join(mat_haul, by = c("cruise", "gis_station")) -> cpue
+  right_join(mat_haul, by = c("cruise", "gis_station")) %>%
+  #since 2018 had a different survey design, we'll overwrite index site "NA" with
+  #index site 7, since the two stations sampled were very similar to locations of 
+  #NBS index site 7 stations
+  mutate_at(vars(index_site), ~replace_na(., 7)) -> cpue
 
 ##################################################
 #Write new master csv                               
 write_csv(cpue, file="./data/pcr_haul_master.csv")
   
-  
+
+
 

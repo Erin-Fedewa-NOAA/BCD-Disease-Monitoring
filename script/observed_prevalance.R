@@ -1,8 +1,7 @@
 # notes ----
-#Objective 2: Baseline estimates of Hematodinium infection prevalence in EBS monitoring sites
+#Baseline estimates of Hematodinium infection prevalence in EBS monitoring sites
   
 # Author: Erin Fedewa
-# last updated: 2022/9/11
 
 # load ----
 library(tidyverse)
@@ -17,10 +16,8 @@ dat <- read.csv("./data/pcr_haul_master.csv")
 #Data wrangling 
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
-  filter(index_site %in% c(1:6),
-         year %in% c(2015:2017),
-         sex %in% c(1, 2),
-         pcr_result %in% c(1, 0)) %>%
+  filter(pcr_result %in% c(1, 0), 
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   select(species_name, pcr_result, size, sex, index_site, year, gis_station, julian, mid_longitude, bottom_depth, 
          gear_temperature, tanner70under_cpue, tannerimm_cpue) %>%
   rename(pcr = pcr_result,

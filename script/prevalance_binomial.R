@@ -17,12 +17,8 @@ dat = read.csv("./data/pcr_haul_master.csv")
 ## Snow crab -----------------------------------------------
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date
-  filter(species_name == "Chionoecetes opilio",
-         index_site %in% c(4, 5, 6),
-         year %in% c(2015:2017),
-         sex %in% c(1, 2),
-         size > 0,
-         pcr_result %in% c(1, 0)) %>%
+  filter(pcr_result %in% c(1, 0), 
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   select(pcr_result, size, sex, index_site, year, gis_station, julian, mid_latitude, bottom_depth,
          gear_temperature, snow70under_cpue, snowimm_cpue) %>%
   rename(pcr = pcr_result,
