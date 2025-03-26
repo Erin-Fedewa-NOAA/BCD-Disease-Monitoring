@@ -1,5 +1,4 @@
-# notes ----
-#Manuscript Objective 1:compare testing accuracy of diagnostic methods
+#Compare testing accuracy of diagnostic methods
 #Sensitivity and specificity analysis between PCR and visual diagnosis
 
 # Author: Erin Fedewa
@@ -166,48 +165,4 @@ total %>%
 ggsave("./figs/sens_spec.png", width=7)
 
 
-######################################################
-#Exploration of a bayesian latent-class model for sensitivity & specificity
-  #in the absence of a gold standard 
 
-#Approach 1: JAGS model
-library(readxl)
-library(runjags)
-library(rjags)
-testjags()
-
-Sys.setenv(JAGS_HOME = "C:/Users/erin.fedewa/AppData/Local/Programs/JAGS/JAGS-4.3.1/x64/bin/jags-terminal.exe")
- 
-#Reference: https://github.com/paoloeusebi/BLCM-Covid19/blob/master/covid_r1_ind_I.R
-#https://academic.oup.com/aje/article/190/8/1689/6206818
-#https://cran.r-project.org/web/packages/runjags/vignettes/quickjags.html
-
-#Model structure for run.jags() is a little over my head....side burner for now
-
-#Approach 2: R Shiny App for latent class models
-#https://www.nandinidendukuri.com/how-to-guide-on-a-r-shiny-app-to-do-bayesian-inference-for-diagnostic-meta-analysis/
-dat2 %>%
-  filter(julian <= 198) %>%
-  summarise(TP_n = nrow(filter(.,sen_spec=="TP")),
-            FP_n = nrow(filter(.,sen_spec=="FP")),
-            FN_n = nrow(filter(.,sen_spec=="FN")),
-            TN_n = nrow(filter(.,sen_spec=="TN"))) -> early
-
-dat2 %>%
-  filter(julian > 198) %>%
-  summarise(TP_n = nrow(filter(.,sen_spec=="TP")),
-            FP_n = nrow(filter(.,sen_spec=="FP")),
-            FN_n = nrow(filter(.,sen_spec=="FN")),
-            TN_n = nrow(filter(.,sen_spec=="TN"))) -> late
-
-#Set up data structure to feed to R shiny model 
-tp <- c(early$TP_n, late$TP_n) 
-fp <- c(early$FP_n, late$FP_n) 
-fn <- c(early$FN_n, late$FN_n) 
-tn <- c(early$TN_n, late$TN_n) 
-cell <- cbind(tp, fp, fn, tn)
-n <- length(tp)  #  Number of studies      
-write("tp fp fn tn","output/Sens_Data.txt")
-for (j in 1:n) write(cell[j,],"output/Sens_Data.txt",append=T)
-
-#Output used to run model on R shiny app 

@@ -63,7 +63,7 @@ ggplot(df_snow) +
     geom_point(aes(year, estimate__ * 100), color = "#2171b5", size = 3, position = dodge) +
     geom_errorbar(aes(year, ymin = lower__ * 100, ymax = upper__ * 100),
                   width = 0.3, size = 0.5, position = dodge, color = "#2171b5") +
-    ylab("Bitter Crab Disease Prevalance (%)") + xlab("") +
+    ylab("Bitter Crab Disease Prevalence (%)") + xlab("") +
     theme_bw() +
     theme(panel.grid.major.x = element_blank()) +
     theme(legend.title = element_blank()) +
@@ -121,7 +121,7 @@ ggplot(df_snow_nbs) +
   geom_point(aes(year, estimate__ * 100), color = "#238b45", size = 3, position = dodge) +
   geom_errorbar(aes(year, ymin = lower__ * 100, ymax = upper__ * 100),
                 width = 0.3, size = 0.5, position = dodge, color = "#238b45") +
-  ylab("Bitter Crab Disease Prevalance (%)") + xlab("") +
+  ylab("Bitter Crab Disease Prevalence (%)") + xlab("") +
   theme_bw() +
   theme(panel.grid.major.x = element_blank()) +
   theme(legend.title = element_blank()) +

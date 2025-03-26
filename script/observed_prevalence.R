@@ -69,12 +69,12 @@ prev_n %>%
   geom_errorbar(aes(ymin=CI_lower, ymax=CI_upper), width=0.2, color="grey") + 
   #geom_text(aes(label=paste0("n=",n), group=index), vjust = -2.2, size=2) +
   scale_y_continuous(limits = c(0,100)) +
-  labs(x="Monitoring Site", y="Prevalance (%)") +
-  facet_grid(year ~ factor(species, levels = c("Tanner crab", "Snow crab")), scales = "free_x") +
+  labs(x="Monitoring Site", y="Prevalence (%)") +
+  facet_wrap(~year) +
   theme_bw() 
 ggsave("./figures/opilio_obs_prev.png")
 
-#Prevelance plot by site/size version 2 
+#Prevalence plot by site/size version 2 
 snow_colors <- RColorBrewer::brewer.pal(8, "Blues")[c(3,5,6,8)]
 
 prev_n %>%
@@ -83,10 +83,10 @@ prev_n %>%
   geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75) + 
   scale_fill_manual(values = snow_colors) +
   geom_errorbar(aes(ymin=CI_lower, ymax=CI_upper), width=0.2, color="dark grey", position = position_dodge(width = .9)) + 
-  #geom_text(aes(year, Prevalance, label=paste0("n=",n)), size=2,
+  #geom_text(aes(year, Prevalence, label=paste0("n=",n)), size=2,
             #position = position_dodge(width = .9), vjust=-5) +
   scale_y_continuous(limits = c(0,100)) +
-  labs(x="", y="Prevalance (%)", fill="Monitoring Site", title="Snow Crab") +
+  labs(x="", y="Prevalence (%)", fill="Monitoring Site", title="Snow Crab") +
   theme_classic() +
   theme(plot.title=element_text(hjust=0.5)) +
   theme(panel.grid.major = element_line())
