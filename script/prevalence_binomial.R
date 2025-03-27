@@ -15,9 +15,8 @@ source("./scripts/stan_utils.R")
 # load PCR data
 dat = read.csv("./data/pcr_haul_master.csv")
 
-## Snow crab data -----------------------------------------------
-
-#Eastern Bering Sea
+#########################################################################
+#Eastern Bering Sea model
 dat %>%
   filter(general_location == "EBS",
          size > 0) %>%
@@ -55,10 +54,11 @@ pp_check(ebs_snow_pcr, type = "dens_overlay", ndraws = 100)
 bayes_R2(ebs_snow_pcr) #0.14
 plot(conditional_smooths(ebs_snow_pcr), ask = FALSE)
 
-#extract year conditional effect and plot
+#extract year conditional effect 
 ce_snow_pcr = brms::conditional_effects(ebs_snow_pcr, effect = "year")
 df_snow = ce_snow_pcr$year
 
+#plot estimated annual prevalence in EBS
 ggplot(df_snow) +
     geom_point(aes(year, estimate__ * 100), color = "#2171b5", size = 3, position = dodge) +
     geom_errorbar(aes(year, ymin = lower__ * 100, ymax = upper__ * 100),
@@ -72,10 +72,13 @@ ggplot(df_snow) +
     theme(plot.title = element_text(hjust = 0.5)) +
   ylim(0,100) -> ebs_plot
 #This story is quite a bit different than observed annual prevalence estimates!
+  #points to the importance of accounting for crab size during sampling efforts
 
-#Northern Bering Sea
+#########################################################
+#Northern Bering Sea Model
   #Note: I tried to fit a model with a year*location interaction but model didn't converge, 
   #likely due to unbalance sampling design and the NBS sampled more infrequently?
+
 dat %>%
   filter(general_location == "NBS",
          size > 0) %>%
@@ -113,10 +116,11 @@ bayes_R2(nbs_snow_pcr) #0.17
 plot(conditional_smooths(nbs_snow_pcr), ask = FALSE)
 #size effect much less apparent here b/c mostly small, immature crab in NBS
 
-#extract year conditional effect and plot
+#extract year conditional effect 
 ce_snow_nbs_pcr = brms::conditional_effects(nbs_snow_pcr, effect = "year")
 df_snow_nbs = ce_snow_nbs_pcr$year
 
+#plot estimated annual prevalence in NBS
 ggplot(df_snow_nbs) +
   geom_point(aes(year, estimate__ * 100), color = "#238b45", size = 3, position = dodge) +
   geom_errorbar(aes(year, ymin = lower__ * 100, ymax = upper__ * 100),
@@ -132,6 +136,17 @@ ggplot(df_snow_nbs) +
 #Hmmm not sure why our point estimate for 2017 has so much associated uncertainty- 
   #probably something to troubleshoot in future iterations
 
+#quick visual look until then
+nbs.opilio %>% 
+  filter(year == 2017) %>%
+  group_by(station) %>%
+  summarise(Prevalance = (sum(pcr)/n())*100) %>%
+  ggplot(aes(station, Prevalance)) +
+  geom_col() 
+#okay, definitely something to look into. All stations sampled in 2017 have 
+  #prevalence > 50% but model is predicting 25% prevalence with lots of uncertainty
+
+####################################################
 #combine plots and save
 ebs_plot + nbs_plot 
 ggsave("./figures/annual_prev.png")
