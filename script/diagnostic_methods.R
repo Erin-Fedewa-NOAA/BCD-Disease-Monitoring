@@ -1,5 +1,15 @@
-#Compare testing accuracy of diagnostic methods
-#Sensitivity and specificity analysis between PCR and visual diagnosis
+#Compare testing accuracy of PCR, dPCR and visual diagnosis
+#Sensitivity and specificity analysis between PCR and visual diagnosis with 
+#additional years
+
+#With 2018+ data:
+#also- how to determine limit of detection of dPCR, and compare sensitivities of 
+  #cPCR vrs dPCR? 
+#things to look at: compare diagnosis/sample size between cPCR, case when nssu_pcr=0 (no PCR for
+  #amplification, only n=30), case when nssu_pcr=0 AND faint_positive=F (n=134)
+#Then bin number of positive partitions by 0 partitions (negative), 1-10 partitions (light infection),
+#11-100 (moderate infection), 101-1000 (moderate-heavy infection) and 1000+ (heavy infection) - double
+#check distribution and max of positive partitions. Is there a less arbitrary way to bin these?
 
 # Author: Erin Fedewa
 # last updated: 2023/1/3
@@ -163,6 +173,14 @@ total %>%
     scale_fill_manual(values = my_colors2) +
     facet_wrap(~factor(Test, levels=c("All Samples", "June-July Samples", "July-Aug Samples")))
 ggsave("./figs/sens_spec.png", width=7)
+
+#Follow up questions for Hamish:
+#1 When developing dPCR assay, shouldn't we be using different dilutions to quantify 
+  #the limits of detection and limits of quantification- because this is important 
+  #to our understanding of disease onset, progression and occurrence 
+#wouldn't it make the most sense to use PCR on 1:10 dilutions as well as dPCR?
+  #because we can't really compare diagnosis/sensitivies from the two methods 
+  #without doing this. And then to point 1, should we run these same samples 
 
 
 

@@ -125,7 +125,8 @@ opilio.dat %>%
   facet_wrap(general_location~year) +
   theme_bw() +
   labs(x= "Sex", y = "Sample size")
-#Weird! In 2017, 2018 and 2019 in the NBS only females were sampled
+#Weird! In 2017, 2018 and 2019 in the NBS only females were sampled- this is 
+  #specified in the 2019 protocol, but I have no idea why only females were targeted
 
 #Size composition sampled by region/yr
 opilio.dat %>%

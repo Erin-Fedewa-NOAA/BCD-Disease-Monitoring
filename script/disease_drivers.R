@@ -1,6 +1,9 @@
 #Investigate factors influencing BCD infection probability (conventional PCR 0/1 diagnosis) 
   #and infection intensity (dPCR # of copies detected) in snow crab using Bayesian multivariate models  
-#Note: using hierarchical modeling approach from Fedewa et al 2025 
+
+#Note: using hierarchical modeling approach from Fedewa et al 2025 - but including 
+  #NBS data in models. Not testing for sex effects because only females targeted in
+  #2017-2019 NBS collections (no idea why.....)
 
 #load packages
 library(tidyverse)
@@ -113,6 +116,7 @@ corr.opilio %>%
 
 ####################################################
 #Probability of infection models: response is 0/1 diagnosis from conventional PCR
+  #includes 2014-2023 data, both EBS and NBS
 
 #Model 1: base model with size, julian day and random year/index intercept 
   #note that we're pooling NBS and EBS data here to look at drivers
@@ -334,10 +338,10 @@ loo(opilio1, opilio2, opilio3) #CPUE improves predictive capacity of base model,
   #though still fairly small improvement
 
 ######################################################
-# Model 4: Add sex to model 3 
+# Model 4: Add depth to model 3 
 
 opilio4_formula <-  bf(pcr ~ s(size, k = 4) + s(julian, k = 4) + s(temperature, k = 4) + 
-                         s(cpue, k=4) + sex + (1 | year/index))                      
+                         s(cpue, k=4) + s(depth, k = 4) + (1 | year/index))                      
 
 opilio4 <- brm(opilio4_formula,
                data = opilio.dat,
@@ -402,126 +406,18 @@ loo(opilio1, opilio2, opilio3, opilio4)  #Opilio4 marginally better, although ag
   #models very similar 
 
 ######################################################
-# Model 5: Add depth to model 4
-
-opilio5_formula <-  bf(pcr ~ s(size, k = 4) + s(julian, k = 4) + s(temperature, k = 4) + 
-                         s(cpue, k=4) + sex + s(depth, k = 4) + (1 | year/index))                      
-
-opilio5 <- brm(opilio5_formula,
-               data = opilio.dat,
-               family =bernoulli(link = "logit"),
-               cores = 4, chains = 4, 
-               warmup = 1500, iter = 6000,
-               save_pars = save_pars(all = TRUE),
-               control = list(adapt_delta = 0.999, max_treedepth = 14))
-
-#Save Output
-saveRDS(opilio5, file = "./output/opilio5.rds")
-opilio5 <- readRDS("./output/opilio5.rds")
-
-#MCMC convergence diagnostics 
-check_hmc_diagnostics(opilio5$fit)
-neff_lowest(opilio5$fit)
-rhat_highest(opilio5$fit)
-summary(opilio5)
-bayes_R2(opilio5) #0.25
-
-#Diagnostic Plots
-plot(opilio5, ask = FALSE)
-plot(conditional_smooths(opilio5), ask = FALSE)
-mcmc_plot(opilio5, type = "areas", prob = 0.95)
-mcmc_rhat(rhat(opilio5)) #Potential scale reduction: All rhats < 1.1
-mcmc_acf(opilio5, pars = c("b_Intercept", "bs_ssize_1", "b_sex2"), lags = 10) #Autocorrelation of selected parameters
-mcmc_neff(neff_ratio(opilio5)) #Effective sample size: All ratios > 0.1
-
-#Posterior Predictive check to assess predictive performance: mean and skewness 
-color_scheme_set("red")
-pmean1 <- posterior_stat_plot(y_obs, opilio5) + 
-  theme(legend.text = element_text(size=8), 
-        legend.title = element_text(size=8)) +
-  labs(x="Mean", title="Mean")
-
-color_scheme_set("gray")
-pskew1 <- posterior_stat_plot(y_obs,opilio5, statistic = "skew") +
-  theme(legend.text = element_text(size=8),
-        legend.title = element_text(size=8)) +
-  labs(x = "Fisher-Pearson Skewness Coeff", title="Skew")
-
-pmean1 + pskew1  
-
-#PPC: Classify posterior probabilities and compare to observed 
-preds <- posterior_epred(opilio5)
-pred <- colMeans(preds) #averaging across draws 
-pr <- as.integer(pred >= 0.5) #Classify probabilities >0.5 as presence of disease 
-mean(xor(pr, as.integer(y_obs == 0))) # posterior classification accuracy fairly good 
-
-# Compute AUC for predicting prevalence with the model
-preds <- posterior_epred(opilio5) #posterior draws
-auc <- apply(preds, 1, function(x) {
-  roc <- roc(y_obs, x, quiet = TRUE)
-  auc(roc)
-})
-hist(auc) #Model discriminates fairly well
-mean(auc)
-
-#Model comparison
-loo(opilio1, opilio2, opilio3, opilio4, opilio5)  #Opilio5 marginally better 
-
-############################################
-#Extract and plot conditional effects of each predictor from best model, opilio5
+#Extract and plot conditional effects of each predictor from best model, opilio4
 #conditioning on the mean for all other predictors, yr/site effects ignored 
-
-#Sex effect plot 
-#Need to save settings from conditional effects as an object to plot in ggplot
-ce1s_1 <- conditional_effects(opilio5, effect = "sex", re_formula = NA,
-                              probs = c(0.025, 0.975)) 
-ce1s_1$sex %>%
-  dplyr::select(sex, estimate__, lower__, upper__) %>%
-  mutate(sex = case_when(sex == 1 ~ "Male",
-                         sex == 2 ~ "Female")) %>%
-ggplot(aes(factor(sex, levels = c("Male", "Female")), estimate__)) +
-  geom_point(size=3.5, color="black") +
-  geom_errorbar(aes(ymin=lower__, ymax=upper__), width=0.3, size=0.5, color="grey60") +
-  labs(y="Probability of infection", x="") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size=12))  -> sexplot
-
-#Size
-## 95% CI
-ce1s_1 <- conditional_effects(opilio5, effect = "size", re_formula = NA,
-                              probs = c(0.025, 0.975))
-## 90% CI
-ce1s_2 <- conditional_effects(opilio5, effect = "size", re_formula = NA,
-                              probs = c(0.05, 0.95))
-## 80% CI
-ce1s_3 <- conditional_effects(opilio5, effect = "size", re_formula = NA,
-                              probs = c(0.1, 0.9))
-dat_ce <- ce1s_1$size
-dat_ce[["upper_95"]] <- dat_ce[["upper__"]]
-dat_ce[["lower_95"]] <- dat_ce[["lower__"]]
-dat_ce[["upper_90"]] <- ce1s_2$size[["upper__"]]
-dat_ce[["lower_90"]] <- ce1s_2$size[["lower__"]]
-dat_ce[["upper_80"]] <- ce1s_3$size[["upper__"]]
-dat_ce[["lower_80"]] <- ce1s_3$size[["lower__"]]
-
-ggplot(dat_ce, aes(x = effect1__, y = estimate__)) +
-  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "#F7FBFF") +
-  geom_ribbon(aes(ymin = lower_90, ymax = upper_90), fill = "#DEEBF7") +
-  geom_ribbon(aes(ymin = lower_80, ymax = upper_80), fill = "#C6DBEF") + 
-  geom_line(size = 1, color = "black") +
-  geom_point(data = opilio.dat, aes(x = size, y = pcr), colour = "grey80", shape= 73, size = 2) + #raw data
-  labs(x = "Carapace width (mm)", y = "") +
-  theme_bw() -> sizeplot
 
 #Julian Day
 ## 95% CI
-ce1s_1 <- conditional_effects(opilio5, effect = "julian", re_formula = NA,
+ce1s_1 <- conditional_effects(opilio4, effect = "julian", re_formula = NA,
                               probs = c(0.025, 0.975))
 ## 90% CI
-ce1s_2 <- conditional_effects(opilio5, effect = "julian", re_formula = NA,
+ce1s_2 <- conditional_effects(opilio4, effect = "julian", re_formula = NA,
                               probs = c(0.05, 0.95))
 ## 80% CI
-ce1s_3 <- conditional_effects(opilio5, effect = "julian", re_formula = NA,
+ce1s_3 <- conditional_effects(opilio4, effect = "julian", re_formula = NA,
                               probs = c(0.1, 0.9))
 dat_ce <- ce1s_1$julian
 dat_ce[["upper_95"]] <- dat_ce[["upper__"]]
@@ -542,13 +438,13 @@ ggplot(dat_ce, aes(x = effect1__, y = estimate__)) +
 
 #Depth
 ## 95% CI
-ce1s_1 <- conditional_effects(opilio5, effect = "depth", re_formula = NA,
+ce1s_1 <- conditional_effects(opilio4, effect = "depth", re_formula = NA,
                               probs = c(0.025, 0.975))
 ## 90% CI
-ce1s_2 <- conditional_effects(opilio5, effect = "depth", re_formula = NA,
+ce1s_2 <- conditional_effects(opilio4, effect = "depth", re_formula = NA,
                               probs = c(0.05, 0.95))
 ## 80% CI
-ce1s_3 <- conditional_effects(opilio5, effect = "depth", re_formula = NA,
+ce1s_3 <- conditional_effects(opilio4, effect = "depth", re_formula = NA,
                               probs = c(0.1, 0.9))
 dat_ce <- ce1s_1$depth
 dat_ce[["upper_95"]] <- dat_ce[["upper__"]]
@@ -569,13 +465,13 @@ ggplot(dat_ce, aes(x = effect1__, y = estimate__)) +
 
 #CPUE
 ## 95% CI
-ce1s_1 <- conditional_effects(opilio5, effect = "cpue", re_formula = NA,
+ce1s_1 <- conditional_effects(opilio4, effect = "cpue", re_formula = NA,
                               probs = c(0.025, 0.975))
 ## 90% CI
-ce1s_2 <- conditional_effects(opilio5, effect = "cpue", re_formula = NA,
+ce1s_2 <- conditional_effects(opilio4, effect = "cpue", re_formula = NA,
                               probs = c(0.05, 0.95))
 ## 80% CI
-ce1s_3 <- conditional_effects(opilio5, effect = "cpue", re_formula = NA,
+ce1s_3 <- conditional_effects(opilio4, effect = "cpue", re_formula = NA,
                               probs = c(0.1, 0.9))
 dat_ce <- ce1s_1$cpue
 dat_ce[["upper_95"]] <- dat_ce[["upper__"]]
@@ -596,13 +492,13 @@ ggplot(dat_ce, aes(x = effect1__, y = estimate__)) +
 
 #temperature
 ## 95% CI
-ce1s_1 <- conditional_effects(opilio5, effect = "temperature", re_formula = NA,
+ce1s_1 <- conditional_effects(opilio4, effect = "temperature", re_formula = NA,
                               probs = c(0.025, 0.975))
 ## 90% CI
-ce1s_2 <- conditional_effects(opilio5, effect = "temperature", re_formula = NA,
+ce1s_2 <- conditional_effects(opilio4, effect = "temperature", re_formula = NA,
                               probs = c(0.05, 0.95))
 ## 80% CI
-ce1s_3 <- conditional_effects(opilio5, effect = "temperature", re_formula = NA,
+ce1s_3 <- conditional_effects(opilio4, effect = "temperature", re_formula = NA,
                               probs = c(0.1, 0.9))
 dat_ce <- ce1s_1$temperature
 dat_ce[["upper_95"]] <- dat_ce[["upper__"]]
@@ -622,21 +518,39 @@ ggplot(dat_ce, aes(x = effect1__, y = estimate__)) +
   theme_bw() -> tempplot
 
 #Combine plots 
-(sexplot + sizeplot) / (dayplot + depthplot) / (cpueplot + tempplot) +
+(dayplot + depthplot) / (cpueplot + tempplot) + (sizeplot + plot_spacer()) +
   plot_annotation(title = "Factors associated with BCD Occurrence", 
                   theme = theme(plot.title = element_text(hjust = 0.5)))
 ggsave("./figures/drivers_occurrence.png", height=9)
 
 
 ################################################################################
-#Drivers of infection intensity models: response is # of positive partitions
-  #from dPCR
+#Drivers of infection intensity models: response is # of positive partitions from dPCR
+  #Note that this is 2018+ data and infected individuals only (much smaller dataset)
 
-#logistic regression? filter out not infected, 
+#logistic regression? filter out not infected (need to filter out faint pos/nssu too?)
   #mutate/casewhen to add column for 1-4 infection prob, and 1-2 infection
   #prob (heavy/light only)
 
-
+#Data Manipulation
+dat %>%
+  mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
+  filter(no_positive_partitions > 0,
+         faint_pos == "NA",
+         nssu_pcr == 1,
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
+  select(pcr_result, size, no_positive_partitions, general_location, sex, index_site, year, gis_station, julian, 
+         mid_latitude, bottom_depth,gear_temperature, cpue) %>%
+  rename(pcr = pcr_result, 
+         station = gis_station,
+         latitude = mid_latitude,
+         depth = bottom_depth,
+         temperature = gear_temperature,
+         index = index_site) %>%
+  mutate(year = as.factor(year),
+         sex = as.factor(sex),
+         index = as.factor(index),
+         station = as.factor(station)) -> dpcr.dat 
 
 
 
