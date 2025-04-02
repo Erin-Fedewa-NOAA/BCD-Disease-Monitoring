@@ -72,7 +72,7 @@ One master dataset has been produced for further modeling via the "append_haul" 
 |  `collection_comments`    |    Notes on datasheet from at-sea samplers   |   text
 |  `pcr_result` | Bitter crab disease diagnosis via conventional PCR assay for detection of Hematodinium spp. DNA. 0=uninfected, 1=infected, 3=undetermined   |  numeric
 | `year`     |        Year of specimen collection | numeric
-|  `index_site` | Bering Sea sites established for bitter crab disease monitoring. Sites 4-6 = EBS snow crab index sites, Site 7 = NBS snow crab index site. In 2018, the NBS index site was designated as "NBS" because this was a rapid response survey and sampling was not conducted in standard survey grid   |  numeric
+|  `index_site` | Bering Sea sites established for bitter crab disease monitoring. Sites 4-6 = EBS snow crab index sites, Site 7 = NBS snow crab index site. In 2018, NBS sampling was conducted during a rapid response survey so spatial extent is smaller, but still designated as index site 7 because sampling was in close proximity to NBS standard index site stations   |  numeric
 |  `general_location` | Large marine ecosystem. EBS=eastern Bering Sea, NBS=northern Bering Sea   |  text
 |  `collected_by` | Agency taking hemolymph samples. SAP = NOAA AFSC Shellfish Assessment Program   |  text
 |  `dna_plate_no` | Plate number containing hemolymph sample   |  numeric
