@@ -150,3 +150,12 @@ nbs.opilio %>%
 #combine plots and save
 ebs_plot + nbs_plot 
 ggsave("./figures/annual_prev.png")
+
+#save combined EBS/NBS prevalence estimates
+df_snow %>%
+  mutate(region = "EBS") %>%
+  bind_rows(df_snow_nbs %>%
+              mutate(region = "NBS")) %>%
+  rename(prevalence = estimate__) %>%
+  mutate(prevalence_perc = prevalence*100) %>%
+  write_csv(file="./output/prevalence_estimates_model.csv")

@@ -182,5 +182,51 @@ ggsave("./figs/sens_spec.png", width=7)
   #because we can't really compare diagnosis/sensitivies from the two methods 
   #without doing this. And then to point 1, should we run these same samples 
 
+########################################################
+#data exploration of dPCR data 
+
+#sample sizes of conventional PCR data
+dat %>%
+  filter(pcr_result %in% c(1, 0), 
+         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
+  group_by(year, general_location) %>%
+  summarize(total = n(),
+            pcr_pos = sum(pcr_result==1),
+            pcr_neg = sum(pcr_result==0),
+            pcr_prev = ((sum(pcr_result==1))/total)*100)
+
+#sample sizes of all digital PCR data
+dat %>%
+  filter(pcr_result %in% c(1, 0), 
+         year >= 2018) %>%
+  group_by(year, general_location) %>%
+  summarize(total = n()) #total: 1514
+
+#number of samples with runs that failed to amplify DNA
+dat %>%
+  filter(pcr_result %in% c(1, 0), 
+         year >= 2018,
+         nssu_pcr == 0) %>%
+  summarize(total = n()) #n=30, <2%
+
+#number of samples with faint positives (often questionable and subjective)
+dat %>%
+  filter(pcr_result %in% c(1, 0), 
+         year >= 2018,
+         faint_pos == 1) %>%
+  summarize(total = n()) #n=134, ~8.8%
+
+#see figures on paper to visualize!!!
 
 
+
+#number of samples where individual diagnosed as infected via conventional 
+  #PCR but uninfected via dPCR 
+dat %>%
+  filter(no_positive_partitions == 0,
+         pcr_result == 1, 
+         nssu_pcr == 1,
+         faint_pos == 0) %>%
+  summarize(total = n())
+
+            

@@ -526,18 +526,15 @@ ggsave("./figures/drivers_occurrence.png", height=9)
 
 ################################################################################
 #Drivers of infection intensity models: response is # of positive partitions from dPCR
-  #Note that this is 2018+ data and infected individuals only (much smaller dataset)
-
-#logistic regression? filter out not infected (need to filter out faint pos/nssu too?)
-  #mutate/casewhen to add column for 1-4 infection prob, and 1-2 infection
-  #prob (heavy/light only)
+  #Note that this is 2018+ data and infected individuals only (much smaller dataset), 
+  #and we're filtering out faint positives and runs that didn't amplify dna 
 
 #Data Manipulation
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
-  filter(no_positive_partitions > 0,
-         faint_pos == "NA",
-         nssu_pcr == 1,
+  filter(no_positive_partitions > 0), #infected crab only
+         faint_pos == 0, #excluding faint positives b/c subjective
+         nssu_pcr == 1, #excluding runs that didn't amplify dna
          index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   select(pcr_result, size, no_positive_partitions, general_location, sex, index_site, year, gis_station, julian, 
          mid_latitude, bottom_depth,gear_temperature, cpue) %>%
@@ -551,6 +548,10 @@ dat %>%
          sex = as.factor(sex),
          index = as.factor(index),
          station = as.factor(station)) -> dpcr.dat 
+
+#logistic regression? 
+#mutate/casewhen to add column for 1-4 infection prob, and 1-2 infection
+#prob (heavy/light only) mods (test with gams first?)
 
 
 
