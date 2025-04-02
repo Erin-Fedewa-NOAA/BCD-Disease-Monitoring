@@ -87,8 +87,8 @@ One master dataset has been produced for further modeling via the "append_haul" 
 |  `prioritization` | Dataset has been filtered for prioritization=1, as these were samples prioritized for VIMS PCR analysis   |  numeric
 |  `dna_quant`  |  Concentration of DNA in hemolymph sample extracted (2018+ data only)  | numeric, in ng/microL  
 |  `ratio_260_280`  |  Measurement of the absorbance of light at 260 and 280 nm of extracted DNA. Used to determine the quality/purity, with ~1.8-2 ideal (2018+ data only)  | numeric  
-|  `nssu_pcr`  |  General metazoan PCR primer set (nSSU A and nSSU B) used in conventional PCR as a nominal control for the presence of amplifiable DNA in the samples, where 0=failure to produce an amplification product/no host DNA cells present.  (2018+ data only)  | numeric  
-|  `faint_pos`  |  Subjective assessment of the intensity of the ethidium bromide stained PCR amplification product (2018+ data only). F=faint positive  | numeric  
+|  `nssu_pcr`  |  General metazoan PCR primer set (nSSU A and nSSU B) used in conventional PCR as a nominal control for the presence of amplifiable DNA in the samples: 0 = failure to produce an amplification product/no host DNA cells present.  (2018+ data only)  | numeric  
+|  `faint_pos`  |  Faint positive diagnosis: Subjective assessment of the intensity of the ethidium bromide stained PCR amplification product (2018+ data only). 1 = faint positive  | numeric  
 |  `no_valid_partitions`  |  Number of partitions where the reference fluorescence signal is detected and therefore this partition can be used in subsequent digital PCR calculations. (2018+ data only)  | numeric  
 |  `no_positive_partitions`  |  Number of partitions where fluorescent signal from amplification of the target DNA (Hematodinium) was detected during digital PCR. (2018+ data only)  | numeric  
 |  `copies_ul`  |  Poisson statistics-based calculation of the copy number of the target DNA sequence. (2018+ data only)  | numeric 
