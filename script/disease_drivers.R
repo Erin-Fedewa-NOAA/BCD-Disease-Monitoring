@@ -5,6 +5,11 @@
   #NBS data in models. Not testing for sex effects because only females targeted in
   #2017-2019 NBS collections (no idea why.....)
 
+#Haven't yet run infection load models- limited sample size and majority of low 
+  #grade infections need some thought as to best approach for modeling drivers-
+  #more rationale for splitting into two bins, high vrs low intensity infection, 
+  #and use binomial models 
+
 #load packages
 library(tidyverse)
 library(lubridate)
@@ -527,13 +532,12 @@ ggsave("./figures/drivers_occurrence.png", height=9)
 ################################################################################
 #Drivers of infection intensity models: response is # of positive partitions from dPCR
   #Note that this is 2018+ data and infected individuals only (much smaller dataset), 
-  #and we're filtering out faint positives and runs that didn't amplify dna 
+  #and we're filtering out runs that didn't amplify DNA (<2%)
 
 #Data Manipulation
 dat %>%
   mutate(julian=yday(parse_date_time(start_date, "mdy", "US/Alaska"))) %>%  #add julian date 
-  filter(no_positive_partitions > 0), #infected crab only
-         faint_pos == 0, #excluding faint positives b/c subjective
+  filter(no_positive_partitions > 0, #infected crab only
          nssu_pcr == 1, #excluding runs that didn't amplify dna
          index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
   select(pcr_result, size, no_positive_partitions, general_location, sex, index_site, year, gis_station, julian, 
@@ -549,9 +553,26 @@ dat %>%
          index = as.factor(index),
          station = as.factor(station)) -> dpcr.dat 
 
-#logistic regression? 
-#mutate/casewhen to add column for 1-4 infection prob, and 1-2 infection
-#prob (heavy/light only) mods (test with gams first?)
+#look at histos/density curves of # of positive partitions- assign breaks via R based on modal 
+  #analysis? 
+dpcr.dat %>%
+  ggplot()+
+  geom_histogram(aes(no_positive_partitions))
+#Wow, looks like we've got a lot of very low grade infections- not even sure 
+#sample sizes will be large enough for modeling 
+
+#To do: bin samples by Hamish categories and run models, response= prob of infection intensity
+  #bin number of positive partitions by 1-10 partitions (light infection),
+  #11-100 (moderate infection), 101-1000 (moderate-heavy infection) and 1000+ (heavy infection)
+  #is there a less arbiratry way to bin? Don't think we have enough data/peaks for modal analysis
+  #to identify breaks in the data, might be better to just use binomial approach below
+
+#Given very right and left skewed data, bin samples in two bins, light 
+  #infection (1-4000?) vrs heavy (4000+?), response=prob of high intensity infection
+
+#Not sure how to structure these models- first is logistic, second is 
+  #binomial (e.g 0% to 100%, two categories only) ?
+
 
 
 

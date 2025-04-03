@@ -2,6 +2,9 @@
   #This approach allows us to "correct" for Julian day and crab size effect, because
   #we know prevalence increases with Julian day and in smaller crab, and our sampling
   #design doesn't account for this
+
+#NOTE: I think we should be filtering out faint positives? Or at least faint 
+  #positives where # of positive partitions = 0 also?
   
 #Author: Erin Fedewa
 

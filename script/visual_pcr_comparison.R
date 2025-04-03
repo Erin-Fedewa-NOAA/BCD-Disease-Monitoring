@@ -193,7 +193,7 @@ ggplot() +
 prev_mod %>%
   select(year, region, prevalence_perc) %>%
   rename(perc_prevalence = prevalence_perc) %>%
-  mutate(method = "Molecular Survelliance") %>%
+  mutate(method = "Molecular Survelliance: Conventional PCR") %>%
   rbind(prev_visual %>%
           mutate(method = "Visual Survelliance: EBS-wide")) %>%
   ggplot(aes(year, perc_prevalence, group=region, color=region)) +
@@ -202,6 +202,7 @@ prev_mod %>%
   theme_bw() + 
   labs(y="Disease Prevalence (%)", x="") +
   facet_wrap(~method, scales="free_y") 
+ggsave("./figures/visual_vrs_PCR_prev.png")
 
 #And now let's look at correlation - combining both regions here
 prev_mod %>%
@@ -216,17 +217,17 @@ r <- round(cor(comb_prev$`Molecular Survelliance`, comb_prev$`Visual Survellianc
                use="pairwise.complete.obs"), 2)
 p <- cor.test(comb_prev$`Molecular Survelliance`, comb_prev$`Visual Survelliance: EBS-wide`)$p.value
  
-ggplot(comb_prev, aes(y=`Molecular Survelliance`, x=`Visual Survelliance: EBS-wide`)) + 
+ggplot(comb_prev, aes(y=`Molecular Survelliance`, x=`Visual Survelliance: EBS-wide`, color=region)) + 
   #geom_point() +  
-   geom_text(aes(label=year)) +
+   geom_text(aes(label=year, color=region)) +
   geom_smooth(method="lm", col="black") + 
   annotate("text", x=2.5, y=4.5, label=paste0("r = ", r), hjust=0) +
   annotate("text", x=2.5, y=8, label=paste0("p = ", round(p, 3)), hjust=0) +
   theme_classic() +
   labs(x="Prevalence estimated from visual survelliance", 
        y="Prevalence estimated from molecular survelliance")
+ggsave("./figures/visual_pcr_corr.png")
 #For a first pass this is actually much better than I'd expected! 
-
 
 #####################################################################
 #And now we'll repeat the same process as above, but calculate visual prevalence
