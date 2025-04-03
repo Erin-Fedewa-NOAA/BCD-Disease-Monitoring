@@ -31,6 +31,7 @@ library(RColorBrewer)
 library(knitr)
 library(loo)
 library(sjPlot)
+library(prettyglm)
 source("./script/stan_utils.R")
 
 
@@ -68,8 +69,9 @@ dat %>%
   filter(pcr_result %in% c(1, 0),
          size > 0, 
          sex %in% c(1,2),
-         index_site != 2) %>% #3 snow crab samples collected at a tanner crab index site
-  select(pcr_result, size, general_location, sex, index_site, year, gis_station, julian, 
+         index_site != 2, #3 snow crab samples collected at a tanner crab index site
+         no_positive_partitions >= 0) %>% 
+  select(pcr_result, size, general_location, no_positive_partitions, sex, index_site, year, gis_station, julian, 
          mid_latitude, bottom_depth,gear_temperature, cpue) %>%
   rename(pcr = pcr_result, 
          station = gis_station,
@@ -574,5 +576,25 @@ dpcr.dat %>%
   #binomial (e.g 0% to 100%, two categories only) ?
 
 
+#Let's first test a preliminary logistic regression model to look at how infection
+  #load influences the probability of an infection
+  #but the problem here is that we're using standard and dPCR products, which we know
+  #have different sensitivities-so probably need to create a 0/1 infection status
+  #column using positive partitions >0/=1 and not use standard PCR data (see outlier issue below)
 
+model <- glm(pcr ~ no_positive_partitions, data = opilio.dat, family = binomial(link = "logit"))
+summary(model) 
+plot(model) #outliers are most commonly due to large dPCR load but standard PCR=0 diagnosis
+plot(opilio.dat$pcr ~ opilio.dat$no_positive_partitions)
+#right duh, we can't fit a binomial model to this 
 
+pretty_relativities(feature_to_plot= 'no_positive_partitions',
+                    model_object = model,
+                    relativity_label = 'Probability of infection',
+                    upper_percentile_to_cut = 0.1)
+
+#Finding observations that are outliers
+hist(model$residuals)
+absres <- abs(model$residuals) #Absolute value of the residual.  You can do any transformation of the residuals you find appropriate.
+q <- quantile(absres, probs = .95) #The 95th quantile of this distribution
+opilio.dat[which(absres>q),]
